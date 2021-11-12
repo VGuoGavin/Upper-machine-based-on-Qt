@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/back">
+        <file>Images/control.png</file>
+        <file>Images/Gobao.png</file>
+        <file>Images/calbration.png</file>
+        <file>Images/calibration_selected.png</file>
+        <file>Images/control_selected.png</file>
+        <file>Images/home.png</file>
+        <file>Images/home_selected.png</file>
+        <file>Images/showpanel.png</file>
+        <file>Images/showpanel_selected.png</file>
+        <file>Images/communacation.png</file>
+        <file>Images/communacation2.png</file>
+        <file>Images/Panel.png</file>
+    </qresource>
+</RCC>
