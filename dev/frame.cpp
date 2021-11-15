@@ -2,7 +2,7 @@
 #include<QDebug>
 #include<QString>
 
-#define CHECK_CODE "aa55"   //用于校验收到的帧是否是帧的开头
+#define CHECK_CODE "aa55"   //设置帧头用于定位和组帧
 
 
 QString linked_frame="";    //保存连接后的帧
@@ -23,7 +23,7 @@ QString Frame::LinkFram(QString str){
         if(first==true&&linked_frame.length()<124){         //帧前半部分已确定
             linked_frame=linked_frame+str;
             first=false;
-            qDebug()<<"连接后的:"<<linked_frame;              //输出连接后的帧
+          //  qDebug()<<"连接后的:"<<linked_frame;              //输出连接后的帧
              return linked_frame;                            //舍弃
         }else{
             first=false;
@@ -38,7 +38,7 @@ QString Frame::LinkFram(QString str){
 QString Frame::CheckCode(QString frame){
     int len=frame.length();
     QString sum_code=frame.mid(len-2,2);    //截取最后两位
-    qDebug()<<"校验输入";
+   // qDebug()<<"校验输入";
     bool ok;                        //用在下面QString 16进制转10进制
     QString sum="";;
     int test=0;
@@ -49,7 +49,7 @@ QString Frame::CheckCode(QString frame){
     }
     //上面通过求和校验
     if(QString::number(test, 16).right(2)==sum_code){
-          qDebug()<<"校验成功输出";
+        //  qDebug()<<"校验成功输出";
         return frame;
     }else{
         return 0;
