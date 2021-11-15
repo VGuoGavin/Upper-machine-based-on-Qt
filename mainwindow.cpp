@@ -44,13 +44,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Calibration *calibration=new Calibration(this);
 
-    QAction *open_file= new QAction("Open file"); //添加动作，动作会自动与被连接控件匹配
-    QAction *save_as=  new QAction("Save as");
+    QAction *open_file= new QAction("打开文件"); //添加动作，动作会自动与被连接控件匹配
+    QAction *save_as=  new QAction("另存为");
+    QAction *help=new QAction("帮助");
+    QAction *about=new QAction("关于");
 
-    QMenu *File=new QMenu("File");          //创建菜单栏
-    QMenu *Setting=new QMenu("Setting");
-    QMenu *Help=new QMenu("Help");
-    QMenu *About=new QMenu("About");
+    QMenu *File=new QMenu("文件");          //创建菜单栏
+    QMenu *Setting=new QMenu("设置");
+    QMenu *Help=new QMenu("帮助");
+    QMenu *About=new QMenu("关于");
 
     ui->menuBar->addMenu(File);             //添加菜单栏
     ui->menuBar->addMenu(Setting);
@@ -59,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     File->addAction(open_file);             //创建menu并与action连接
     File->addAction(save_as);
+    Help->addAction(help);
+    About->addAction(about);
 
     //QMenu *Save=new QMenu("Save as");     //另一种常见menu的方式
     //File->addMenu(Save);                  //直接添加菜单
@@ -69,14 +73,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidget->setCurrentWidget(homewidget);
     ui->stackedWidget->addWidget(calibration);
 
-    //stackedWidget页面的切换
-    connect(ui->pushButton,SIGNAL(clicked()),this, SLOT(ChangetoHome()));
-    connect(ui->pushButton_2,SIGNAL(clicked()),this, SLOT(ChangetoCtrpanel()));
-    connect(ui->pushButton_3,SIGNAL(clicked()),this, SLOT(ChangetoShowpanel())); 
-    connect(ui->pushButton4,SIGNAL(clicked()),this, SLOT(ChangetoCalibration()));
-
     connect(open_file,&QAction::triggered,this,&MainWindow::Open_file);      //将动作与信号相连
     connect(save_as,&QAction::triggered,this,&MainWindow::Save_as);
+    connect(help,&QAction::triggered,this,&MainWindow::Help);
+    connect(about,&QAction::triggered,this,&MainWindow::About);
 
     QDateTime curDateTime=QDateTime::currentDateTime();
     currientTime=curDateTime.toString("yyyy-MM-dd hh:mm:ss");
@@ -95,11 +95,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //这里是在信息框输出对应的操作信息与提示
     connect(p_home,SIGNAL(send_operation_messgae(int,QString,QColor)),this,SLOT(operation_message(int,QString,QColor)));
     connect(p_ctrpanel,SIGNAL(send_operation_messgae(int,QString,QColor)),this,SLOT(operation_message(int,QString,QColor)));
+    connect(p_show,SIGNAL(send_operation_messgae(int,QString,QColor)),this,SLOT(operation_message(int,QString,QColor)));
+    //关掉这个连接，直接在showpanel内实现更直接
+    connect(p_home,SIGNAL(send_start_or_not(bool)),p_show,SLOT(receive_start_or_not(bool)));
 
-    connect(p_home,SIGNAL(send_upmachine_state(int)),this,SLOT(upmachine_message(int)));
-
+    //将show页面出发保存数据的信号传到control页面
+    connect(p_show,SIGNAL(send_savedata_signal(QString,bool)),p_ctrpanel,SLOT(receive_filepath(QString,bool)));
     //操作日志
-    connect(this,SIGNAL(save_operation_messgae(QString)),p_ctrpanel,SLOT(save_operationblog(QString)));
+    connect(this,SIGNAL(save_operation_message(QString)),p_ctrpanel,SLOT(save_operationblog(QString)));
 
 
     this->upmachine_message(0);
@@ -120,34 +123,13 @@ void MainWindow::receive_option(QString receive_option,bool action,int number){
 void MainWindow::receive_frame(QString data){
     if(data!=0){
         //成功拿到连接好的帧数据
-        p_home->ui->lineEdit->setText(data);
+        p_home->ui->board_0x00_lineEdit->setText(data);
         //将数据发送到control panel页面和show panel页面进行显示
         emit frame_to_ctrpanel(data);
         emit frame_to_showpanel(data);
     }
 }
 
-//这里可以用switch语句优化下，多个页面组合在一个函数里
-void MainWindow::ChangetoHome(){
-    ui->stackedWidget->setCurrentIndex(2);
-}
-
-void MainWindow:: ChangetoCtrpanel(){
-    int i=ui->stackedWidget->currentIndex();
-//    qDebug()<<"i:"<<i;
-    ui->stackedWidget->setCurrentIndex(3);
-}
-void MainWindow:: ChangetoShowpanel(){
-    int j=ui->stackedWidget->currentIndex();
-//    qDebug()<<"j:"<<j;
-    ui->stackedWidget->setCurrentIndex(4);
-}
-
-void MainWindow::ChangetoCalibration(){
-    int j=ui->stackedWidget->currentIndex();
-//    qDebug()<<"j:"<<j;
-    ui->stackedWidget->setCurrentIndex(5);
-}
 
 
 void MainWindow::Open_file()
@@ -172,7 +154,7 @@ void MainWindow::Open_file()
             } */
             all=file->readAll();
             qDebug()<< all;
-            p_home->ui->lineEdit->setText(all);  //测试操纵子页面的控件
+            p_home->ui->board_0x00_lineEdit->setText(all);  //测试操纵子页面的控件
             //写数据
             //QByteArray wdata("hello world\n");
             //file->write(wdata);
@@ -246,9 +228,9 @@ void MainWindow::operation_message(int code, QString text,QColor color){
     debug_tmp += "\n";
 
     //-----update logbrowser text--------
-    ui->textEdit_2->moveCursor(QTextCursor::End);
+    ui->blog_textEdit->moveCursor(QTextCursor::End);
     debug_tmp = stringToHtml(debug_tmp, color);
-    ui->textEdit_2->append(debug_tmp);
+    ui->blog_textEdit->append(debug_tmp);
 
 }
 
@@ -275,36 +257,61 @@ void MainWindow:: upmachine_message(int res){
 }
 
 
-void MainWindow::on_pushButton_4_clicked()
+//这里可以用switch语句优化下，多个页面组合在一个函数里
+
+void MainWindow::on_home_pushButton_clicked()
 {
-    emit save_operation_message(ui->textEdit_2->toPlainText());
+    ui->stackedWidget->setCurrentIndex(2);
+    ui->ctr_pushButton->setChecked(false);
+    ui->show_pushButton->setChecked(false);
+    ui->clibration_pushButton->setChecked(false);
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_ctr_pushButton_clicked()
 {
-    ui->pushButton_2->setChecked(false);
-    ui->pushButton_3->setChecked(false);
-    ui->pushButton4->setChecked(false);
+    int i=ui->stackedWidget->currentIndex();
+     //    qDebug()<<"i:"<<i;
+         ui->stackedWidget->setCurrentIndex(3);
+    ui->home_pushButton->setChecked(false);
+    ui->show_pushButton->setChecked(false);
+    ui->clibration_pushButton->setChecked(false);
 }
 
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_show_pushButton_clicked()
 {
-    ui->pushButton->setChecked(false);
-    ui->pushButton_3->setChecked(false);
-    ui->pushButton4->setChecked(false);
+    int j=ui->stackedWidget->currentIndex();
+//    qDebug()<<"j:"<<j;
+    ui->stackedWidget->setCurrentIndex(4);
+    ui->home_pushButton->setChecked(false);
+    ui->ctr_pushButton->setChecked(false);
+    ui->clibration_pushButton->setChecked(false);
 }
 
-void MainWindow::on_pushButton_3_clicked()
+void MainWindow::on_clibration_pushButton_clicked()
 {
-    ui->pushButton->setChecked(false);
-    ui->pushButton_2->setChecked(false);
-    ui->pushButton4->setChecked(false);
+    int j=ui->stackedWidget->currentIndex();
+//    qDebug()<<"j:"<<j;
+    ui->stackedWidget->setCurrentIndex(5);
+    ui->home_pushButton->setChecked(false);
+    ui->ctr_pushButton->setChecked(false);
+    ui->show_pushButton->setChecked(false);
 }
 
-void MainWindow::on_pushButton4_clicked()
+void MainWindow::Help(){
+    QMessageBox::information(this,"帮助", "1、程序启动会自动搜索可用端口，如果查找失败可以手动操作，连接后可以收发数据。\n2、示波器界面保存的数据是图像列表中所有项的数据。\n3、控制下位机界面输入数据后回车便将数据放松到下位机。");
+}
+void MainWindow::About(){
+    QMessageBox::information(this,"关于", "广东高标电子科技中控上位机。");
+}
+
+
+void MainWindow::on_save_pushButton_clicked()
 {
-    ui->pushButton->setChecked(false);
-    ui->pushButton_2->setChecked(false);
-    ui->pushButton_3->setChecked(false);
+    emit save_operation_message(ui->blog_textEdit->toPlainText());
+}
+
+void MainWindow::on_clearblog_pushButton_clicked()
+{
+     ui->blog_textEdit->clear();
 }

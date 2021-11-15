@@ -33,6 +33,7 @@ public:
     Calibration *calibration;
     QString stringToHtml(QString, QColor);
 
+
     ~MainWindow();                           //析构函数
 
 signals:                                     //信号函数，页面内产生信号的函数
@@ -42,30 +43,31 @@ signals:                                     //信号函数，页面内产生信
     void save_operation_message(QString);
 
 private slots:                               //这里定义的是槽函数，对应的信号来后出发下面的函数
-    void ChangetoHome();                     //切换到对应listwidget页面
-    void ChangetoCtrpanel();
-    void ChangetoShowpanel();
-    void ChangetoCalibration();
 
     void Open_file();
     void Save_as();
+    void Help();
+    void About();
 
     void receive_option(QString,bool,int);        //从Control panel页面传来的复选框数据
     //void pushButton4();
     void receive_frame(QString);
+
     void operation_message(int,QString,QColor);
 
     void upmachine_message(int);
 
-    void on_pushButton_4_clicked();
+    void on_home_pushButton_clicked();
 
-    void on_pushButton_clicked();
+    void on_ctr_pushButton_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_show_pushButton_clicked();
 
-    void on_pushButton_3_clicked();
+    void on_clibration_pushButton_clicked();
 
-    void on_pushButton4_clicked();
+    void on_save_pushButton_clicked();
+
+    void on_clearblog_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -76,7 +78,6 @@ private:
     
     QAction *open_file;
     QAction *save_as;
-
 
 };
 
