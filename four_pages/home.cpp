@@ -58,9 +58,10 @@ void Home::on_FindPort_clicked(){
 void Home::Find_Port(){
     //查找可用的串口
     int res=QSerialPortInfo::availablePorts().count();
-    qDebug()<<"串口数量"<<res;
+//    qDebug()<<"串口数量"<<res;
     if(res==0){
         emit send_operation_messgae(0,"未找到可用端口",Qt::red);
+        ui->OpenSerialButton->setDisabled(true);
     }else{
 
         foreach (const QSerialPortInfo &info,QSerialPortInfo::availablePorts())
@@ -76,6 +77,7 @@ void Home::Find_Port(){
             }
             emit send_operation_messgae(0,"成功找到串口:"+serial.portName(),Qt::blue);
         }
+        ui->OpenSerialButton->setDisabled(false);
     }
 }
 
@@ -164,7 +166,7 @@ void Home::on_OpenSerialButton_clicked()
 
         //连接信号槽
         QObject::connect(serial,&QSerialPort::readyRead,this,&Home::ReadData);
-
+        emit send_start_or_not(true);
 
     }
     else
@@ -184,6 +186,7 @@ void Home::on_OpenSerialButton_clicked()
         ui->OpenSerialButton->setText(tr("打开串口"));
 
         emit send_upmachine_state(0);
+        emit send_start_or_not(false);
     }
 
 }
@@ -213,22 +216,24 @@ void Home::ReadData()
         emit frame_to_mainwindow(FRAME);    //在这里定义一个signal用于向主页面发送数据并用于显示
     }
     show_receive=arr.toHex();               //将多个帧放在一起显示在界面里
-    ui->textEdit->append(show_receive);
+    ui->receive_textEdit->append(show_receive);
     buf.clear();
 
 }
 void Home::on_ClearData_clicked(){
-    ui->textEdit->clear();
+    ui->receive_textEdit->clear();
+    ui->send_textEdit->clear();
+    emit send_operation_messgae(0,"已清空显示框内的接收和发送数据",Qt::blue);
 }
 
 //发送按钮槽函数
 void Home::on_SendButton_clicked()
 {
-    qDebug()<<"on_SendButton_clicked is called";
+//    qDebug()<<"on_SendButton_clicked is called";
     if(ui->OpenSerialButton->text() == tr("关闭串口")){
-        serial->write(ui->textEdit_2->toPlainText().toLatin1());
+        serial->write(ui->send_textEdit->toPlainText().toLatin1());
     }else{
-        qDebug()<<"串口关闭";
+//        qDebug()<<"串口关闭";
     }
 }
 

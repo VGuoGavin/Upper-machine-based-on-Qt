@@ -33,7 +33,7 @@ class Showpanel : public QWidget
 public:
     explicit Showpanel(QWidget *parent = 0);
     void plot();
-
+    void savedata(QString);
     ~Showpanel();
 private:
     //画图专用
@@ -47,15 +47,22 @@ private:
 protected:
 //    void timerEvent(QTimerEvent *event);
 
+signals:
+//    void send_savedata_signal(QString,bool);
+    void send_operation_messgae(int,QString,QColor);
 
 private slots:
     void selected(QString data,bool action,int Number);        //负责接收来自control panel页面选择的结果
     void receive_frame(QString);                               //从mainwindow接收到的帧数据
     //void canceled(QString No);
     void change_graph();
+    void on_Save_Button_clicked(bool checked);
+    void receive_start_or_not(bool);                //判断是否已经开启UART数据通信
+
 private:
     Ui::Showpanel *ui;
     QMap<QListWidgetItem*, QCheckBox*> map;                   //item映射到CheckBox
+
 
 };
 

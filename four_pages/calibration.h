@@ -15,6 +15,9 @@ public:
     explicit Calibration(QWidget *parent = 0);
     ~Calibration();
 
+private slots:
+    void on_lineEdit_editingFinished();
+
 private:
     Ui::Calibration *ui;
 };

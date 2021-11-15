@@ -49,16 +49,15 @@ void Ctrpanel::receive_frame(QString frame){
     Message.Max_AllowedTorque=   frame.mid(18,2);
     Message.Malfunction_Output=  frame.mid(20,2);
 
-    ui->lineEdit->setText(Message.Rotate);
-    ui->lineEdit_2->setText(Message.Voltage);
-    ui->lineEdit_3->setText(Message.Electricity);
-    ui->lineEdit_4->setText(Message.Machine_Tempture);
-    ui->lineEdit_5->setText(Message.Controller_Tempture);
-    ui->lineEdit_6->setText(Message.Machine_Zeropoint);
-    ui->lineEdit_7->setText(Message.Machine_Tempturypoint);
-    ui->lineEdit_8->setText(Message.Max_AllowedTorque);
-    ui->lineEdit_9->setText(Message.Malfunction_Output);
-    this->savedata();
+    ui->mcu_ox00_lineEdit->setText(Message.Rotate);
+    ui->mcu_ox01_lineEdit->setText(Message.Voltage);
+    ui->mcu_ox02_lineEdit->setText(Message.Electricity);
+    ui->mcu_ox03_lineEdit->setText(Message.Machine_Tempture);
+    ui->mcu_ox04_lineEdit->setText(Message.Controller_Tempture);
+    ui->mcu_ox05_lineEdit->setText(Message.Machine_Zeropoint);
+    ui->mcu_ox06_lineEdit->setText(Message.Machine_Tempturypoint);
+    ui->mcu_ox07_lineEdit->setText(Message.Max_AllowedTorque);
+    ui->mcu_ox08_lineEdit->setText(Message.Malfunction_Output);
     //qDebug()<<"控制台接收到帧数据"<<frame;
 }
 
@@ -111,32 +110,40 @@ void Ctrpanel:: save_operationblog(QString blog){
     }
 }
 
+//void Ctrpanel:: receive_filepath(QString receive_path,bool rceive_controller){
+//    path=receive_path;
+//    controller=rceive_controller;
+//}
 
-//自动保存帧数据
+//自动保存帧数据，并没用到
+/*
 int cnt=0;
+QString path="";
+bool controller=false;
 void Ctrpanel::savedata(){
+    if(controller==true){
     if(cnt>50){
         QDateTime curDateTime=QDateTime::currentDateTime();
-        QString currientTime=curDateTime.toString("yyyy-MM-dd hh:mm:ss");
-        QString blog_name= curDateTime.toString("yyyy-MM-dd");
+//        QString currientTime=curDateTime.toString("yyyy-MM-dd hh:mm:ss");
+//        QString blog_name= curDateTime.toString("yyyy-MM-dd");
         QString time=curDateTime.toString("hh:mm:ss");
-        qDebug()<<"currientTime"<<currientTime;
+//        qDebug()<<"currientTime"<<currientTime;
 
-        QString dir="D:/Qt program/GoBao1/Blog/";
-        QString file_name = blog_name+".csv";
-        qDebug()<<"file_name:"<<file_name;
+//        QString dir="D:/Qt program/GoBao1/Blog/";
+//        QString file_name = blog_name+".csv";
+//        qDebug()<<"file_name:"<<file_name;
+//        QString file_path=dir+file_name;
 
-        QString file_path=dir+file_name;
-        QFile *file= new QFile(file_path);
+        QFile *file= new QFile(path);
+        qDebug()<<"file_path:"<<path;
 
-        qDebug()<<"file_path:"<<file_path;
-        QDir *Dir=new QDir();
-
-        if(!Dir->exists(dir)){
-            Dir->mkdir(dir);
-        }
-        delete Dir;
-        if(!file->exists(file_path)){
+        //这里是生成一个文件夹
+//        QDir *Dir=new QDir();
+//        if(!Dir->exists(path)){
+//            Dir->mkdir(dir);
+//        }
+//        delete Dir;
+        if(!file->exists(path)){
             file->open(QIODevice::WriteOnly);
             file->close();
         }
@@ -157,29 +164,47 @@ void Ctrpanel::savedata(){
     }else{
         cnt++;
     }
+    }else{
+     qDebug()<<"没有保存"   ;
+    }
 }
-
+*/
 //下面都是复选框选中后触发的发送信号
-void Ctrpanel::on_checkBox_clicked(bool checked)
+void Ctrpanel::on_mcu_ox00_checkbox_clicked(bool checked)
 {
-    QString str=ui->checkBox->text();
+    QString str=ui->mcu_ox00_checkbox->text();
     int number=1;
     emit send_option(str,checked,number); //第1个选中
-    emit send_operation_messgae(0,"选中"+str,Qt::blue);
+    operation(str,checked);
 }
 
-void Ctrpanel::on_checkBox_2_clicked(bool checked)
+void Ctrpanel::on_mcu_ox01_checkBox_clicked(bool checked)
 {
-    QString str=ui->checkBox_2->text();
+    QString str=ui->mcu_ox01_checkBox->text();
     int number=2;
     emit send_option(str,checked,number);    //第2个选中
-    emit send_operation_messgae(0,"选中"+str,Qt::blue);
+    operation(str,checked);
 }
 
-void Ctrpanel::on_checkBox_3_clicked(bool checked)
+void Ctrpanel::on_mcu_ox02_checkbox_clicked(bool checked)
 {
-    QString str=ui->checkBox_3->text();
+    QString str=ui->mcu_ox02_checkbox->text();
     int number=3;
     emit send_option(str,checked,number);
-    emit send_operation_messgae(0,"选中"+str,Qt::blue);
+    operation(str,checked);
 }
+void Ctrpanel::operation(QString str, bool checked){
+    if(checked){
+        emit send_operation_messgae(0,"选中"+str,Qt::blue);
+    }else{
+        emit send_operation_messgae(0,"取消选中"+str,Qt::blue);
+    }
+}
+
+void Ctrpanel::on_sendButton_clicked()
+{
+    qDebug()<<"ui->comboBox_3->currentIndex():"<<ui->comboBox_3->currentIndex();
+}
+
+
+
