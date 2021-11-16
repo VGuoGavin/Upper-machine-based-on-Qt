@@ -4,6 +4,11 @@
 
 #define CHECK_CODE "aa55"   //设置帧头用于定位和组帧
 
+QString FIRST_FRAME = "aa551216310100XXXX";    //用于握手的第一帧
+
+QString ERR_00 = "aa551216310100XX";      //无效ID
+QString ERR_01 = "aa551216310101XX";      //数据长度n超范围；
+QString ERR_02 = "aa551216310102XX";      //ID+n超范围；
 
 QString linked_frame="";    //保存连接后的帧
 
@@ -13,28 +18,65 @@ bool second=false;
 Frame::Frame(){
 
 }
-QString Frame::LinkFram(QString str){
-
-    if(str.mid(0,4)==CHECK_CODE&&first==false&&linked_frame.length()<124){
-        first=true;
-        linked_frame="";
-        linked_frame=str;
-    }else{
-        if(first==true&&linked_frame.length()<124){         //帧前半部分已确定
-            linked_frame=linked_frame+str;
-            first=false;
-          //  qDebug()<<"连接后的:"<<linked_frame;              //输出连接后的帧
-             return linked_frame;                            //舍弃
+//用于选择的函数 因为本页不能使用connec传递参数，所以只让函数直接返回分类值。
+/*1 代表握手成功
+ *0 代表需要进一步处理的帧
+ *-1代表无效ID
+ *-2代表输出长度n超范围
+ *-3代表ID+n超范围
+ */
+int Frame::CheckFrame(QString str){
+    if(str.mid(0,4)==CHECK_CODE){
+        if(str==FIRST_FRAME){
+            qDebug()<<"握手成功";
+            return 1;
+            //emit connect_sucess(REPLY_FIRST);
+        }else if (str==ERR_00) {
+            qDebug()<<"无效ID";
+            return -1;
+        }else if (str==ERR_01) {
+            qDebug()<<"数据长度n超范围";
+            return -2;
+        }else if (str==ERR_02) {
+            return -3;
+            qDebug()<<"ID+n超范围";
         }else{
-            first=false;
-            linked_frame="";
-             return 0;                   //舍弃
-        }                                //帧前半部分没确定
+            return 0;
 
+        }
+    }else{
+        return 0;
     }
-     return 0;                           //舍弃
 }
 
+//用于连接的函数
+QString Frame::LinkFram(QString str){
+
+        if(str.mid(0,4)==CHECK_CODE&&first==false&&linked_frame.length()<124){
+            first=true;
+            linked_frame="";
+            linked_frame=str;
+        }else{
+            if(first==true&&linked_frame.length()<124){         //帧前半部分已确定
+                linked_frame=linked_frame+str;
+                first=false;
+                //qDebug()<<"连接后的:"<<linked_frame;           //输出连接后的帧
+                if(linked_frame.length()<130){
+                    return linked_frame;
+                }else{
+                    return 0;
+                }
+                return linked_frame;                            //舍弃
+            }else{
+                first=false;
+                linked_frame="";
+                return 0;                   //舍弃
+            }                               //帧前半部分没确定
+
+        }
+        return 0;                           //舍弃
+}
+//用于校验的函数
 QString Frame::CheckCode(QString frame){
     int len=frame.length();
     QString sum_code=frame.mid(len-2,2);    //截取最后两位
@@ -49,7 +91,7 @@ QString Frame::CheckCode(QString frame){
     }
     //上面通过求和校验
     if(QString::number(test, 16).right(2)==sum_code){
-        //  qDebug()<<"校验成功输出";
+    //  qDebug()<<"校验成功输出";
         return frame;
     }else{
         return 0;
