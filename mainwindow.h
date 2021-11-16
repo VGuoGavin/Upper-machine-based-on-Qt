@@ -28,9 +28,7 @@ class MainWindow : public QMainWindow   //继承于Qwidget
 
 public:
     explicit MainWindow(QWidget *parent = 0); //explicit(明确的)防止隐式转换
-    Home *homewidget;
-    Ctrpanel *ctrwidget;
-    Calibration *calibration;
+
     QString stringToHtml(QString, QColor);
 
 
@@ -75,7 +73,9 @@ private:
 
 
     Showpanel *showwidget;
-    
+    Home *homewidget;
+    Ctrpanel *ctrwidget;
+    Calibration *calibration;
     QAction *open_file;
     QAction *save_as;
 

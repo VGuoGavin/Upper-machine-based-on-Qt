@@ -20,6 +20,7 @@ QString currentFilePath="";
 extern Home *p_home=nullptr;
 extern Showpanel *p_show=nullptr;
 extern Ctrpanel *p_ctrpanel=nullptr;
+//extern Calibration *p_calibra=nullptr;
 //extern Frame *f=new Frame();
 QString currientTime="";
 
@@ -35,14 +36,13 @@ MainWindow::MainWindow(QWidget *parent) :
     Home *homewidget=new Home(this);              //三个页面
     p_home=homewidget;
 
-    Ctrpanel *ctrwidget=new Ctrpanel(this);
+    ctrwidget=new Ctrpanel(this);
     p_ctrpanel=ctrwidget;
 
-    Showpanel *showwidget=new Showpanel(this);
+    showwidget=new Showpanel(this);
     p_show=showwidget;
 
-
-    Calibration *calibration=new Calibration(this);
+    calibration=new Calibration(this);
 
     QAction *open_file= new QAction("打开文件"); //添加动作，动作会自动与被连接控件匹配
     QAction *save_as=  new QAction("另存为");
@@ -101,9 +101,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //将show页面出发保存数据的信号传到control页面
     connect(p_show,SIGNAL(send_savedata_signal(QString,bool)),p_ctrpanel,SLOT(receive_filepath(QString,bool)));
+
     //操作日志
     connect(this,SIGNAL(save_operation_message(QString)),p_ctrpanel,SLOT(save_operationblog(QString)));
 
+    //control panel页面向下位机发送帧
+    connect(p_ctrpanel,SIGNAL(send_frame(QString)),p_home,SLOT(Write_Data(QString)));
+
+
+    //calibration 修改后发送
+    connect(calibration,SIGNAL(send_frame(QString)),p_home,SLOT(Write_Data(QString)));
 
     this->upmachine_message(0);
     //ctrwidget->Blog();
