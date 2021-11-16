@@ -4,21 +4,9 @@
 #include <QDateTime>
 #include <QDebug>
 #include "ui_showpanel.h"
+#include <vector>
 
-//结构体预留备用
-typedef struct _Message_{
-    QString Rotate;
-    QString Torque;
-    QString Voltage;
-    QString Electricity;
-    QString Sys_Station;
-    QString Machine_Tempture;
-    QString Controller_Tempture;
-    QString Machine_Zeropoint;
-    QString Machine_Tempturypoint;
-    QString Max_AllowedTorque;
-    QString Malfunction_Output;
-}MESSAGE;
+float all_list[27];     //定义出所有的数据样本
 
 
 Ctrpanel::Ctrpanel(QWidget *parent) :
@@ -28,7 +16,9 @@ Ctrpanel::Ctrpanel(QWidget *parent) :
     ui->setupUi(this);
     //向下位机发送数据
     connect(ui->sendButton,SIGNAL(clicked()),this, SLOT(trigger_select()));
-
+    for(int i=0;i<27;i++){
+        all_list[i]=0;                   //list_map赋初值
+    }
 }
 
 Ctrpanel::~Ctrpanel()
@@ -36,28 +26,52 @@ Ctrpanel::~Ctrpanel()
     delete ui;
 }
 //将接收到的帧通过截取直接显示在页面上
-void Ctrpanel::receive_frame(QString frame){
-    MESSAGE Message;
-    Frame=frame.toUtf8();
-    Message.Rotate          =    frame.mid(4,2);
-    Message.Voltage         =    frame.mid(6,2);
-    Message.Electricity     =    frame.mid(8,2);
-    Message.Machine_Tempture=    frame.mid(10,2);
-    Message.Controller_Tempture= frame.mid(12,2);
-    Message.Machine_Zeropoint=   frame.mid(14,2);
-    Message.Machine_Tempturypoint=frame.mid(16,2);
-    Message.Max_AllowedTorque=   frame.mid(18,2);
-    Message.Malfunction_Output=  frame.mid(20,2);
+//已经修改了指定位置截取帧，符合协议，只需要再略微修改即可。
+void Ctrpanel::receive_frame(QString frame){            /*这个接收到的是系列号、地址、命令为  */
+    bool ok;
+    int preface=60;
+    //    int length=frame.mid(10,2).toInt(&ok,16);
+    //    int begin=frame.mid(12,4).toInt(&ok,16);
+    int length=30;
+    int begin=0;
+//    qDebug()<<"frame"<<frame;
+    for(int i=0; i<length;i++){
+        if(begin+i<24){
+            all_list[begin+i]=frame.mid(preface+begin+i,2).toInt(&ok,16);
+//            qDebug()<<"all_list"<<all_list[begin+i];
+        }else{
+            all_list[begin+i]=frame.mid(preface+begin+i,4).toInt(&ok,16);
+        }
+    }
+//    qDebug()<<"all_list"<<all_list;
+    ui->mcu_ox00_lineEdit->setText(QString::number(all_list[0],'f',2));
+    ui->mcu_ox01_lineEdit->setText(QString::number(all_list[1],'f',2));
+    ui->mcu_ox02_lineEdit->setText(QString::number(all_list[2],'f',2));
+    ui->mcu_ox03_lineEdit->setText(QString::number(all_list[3],'f',2));
+    ui->mcu_ox04_lineEdit->setText(QString::number(all_list[4],'f',2));
+    ui->mcu_ox05_lineEdit->setText(QString::number(all_list[5],'g',10));
+    ui->mcu_ox06_lineEdit->setText(QString::number(all_list[6],'g',10));
+    ui->mcu_ox07_lineEdit->setText(QString::number(all_list[7],'g',10));
+    ui->mcu_ox08_lineEdit->setText(QString::number(all_list[8],'g',10));
+    ui->mcu_ox09_lineEdit->setText(QString::number(all_list[9],'g',10));
+    ui->mcu_ox0A_lineEdit->setText(QString::number(all_list[10],'g',10));
+    ui->mcu_ox0B_lineEdit->setText(QString::number(all_list[11],'f',2));
+    ui->mcu_ox0C_lineEdit->setText(QString::number(all_list[12],'f',2));
+    ui->mcu_ox0D_lineEdit->setText(QString::number(all_list[13],'f',2));
+    ui->mcu_ox0E_lineEdit->setText(QString::number(all_list[14],'f',2));
+    ui->mcu_ox0F_lineEdit->setText(QString::number(all_list[15],'f',2));
+    ui->mcu_ox10_lineEdit->setText(QString::number(all_list[16],'g',10));
+    ui->mcu_ox11_lineEdit->setText(QString::number(all_list[17],'g',10));
+    ui->mcu_ox12_lineEdit->setText(QString::number(all_list[18],'g',10));
+    ui->mcu_ox13_lineEdit->setText(QString::number(all_list[19],'g',10));
+    ui->mcu_ox14_lineEdit->setText(QString::number(all_list[20],'g',10));
+    ui->mcu_ox15_lineEdit->setText(QString::number(all_list[21],'g',10));
+    ui->mcu_ox16_lineEdit->setText(QString::number(all_list[22],'g',10));
+    ui->mcu_ox17_lineEdit->setText(QString::number(all_list[23],'g',10));
+    ui->mcu_ox18_lineEdit->setText(QString::number(all_list[24],'g',10));
+    ui->mcu_ox19_lineEdit->setText(QString::number(all_list[25],'g',10));
+    ui->mcu_ox1A_lineEdit->setText(QString::number(all_list[26],'g',10));
 
-    ui->mcu_ox00_lineEdit->setText(Message.Rotate);
-    ui->mcu_ox01_lineEdit->setText(Message.Voltage);
-    ui->mcu_ox02_lineEdit->setText(Message.Electricity);
-    ui->mcu_ox03_lineEdit->setText(Message.Machine_Tempture);
-    ui->mcu_ox04_lineEdit->setText(Message.Controller_Tempture);
-    ui->mcu_ox05_lineEdit->setText(Message.Machine_Zeropoint);
-    ui->mcu_ox06_lineEdit->setText(Message.Machine_Tempturypoint);
-    ui->mcu_ox07_lineEdit->setText(Message.Max_AllowedTorque);
-    ui->mcu_ox08_lineEdit->setText(Message.Malfunction_Output);
     //qDebug()<<"控制台接收到帧数据"<<frame;
 }
 
@@ -105,15 +119,31 @@ void Ctrpanel:: save_operationblog(QString blog){
         delete file;
 
         QMessageBox::information(this, tr("操作提醒！"),
-                              "成功保存到"+file_path,
-                              QMessageBox::Ok);
+                                 "成功保存到"+file_path,
+                                 QMessageBox::Ok);
     }
 }
 
-//void Ctrpanel:: receive_filepath(QString receive_path,bool rceive_controller){
-//    path=receive_path;
-//    controller=rceive_controller;
-//}
+
+/*下边是发送数据所进行的格式化*/
+void Ctrpanel::on_sendButton_clicked()
+{
+    //将Int形转为16进制并在前面补零
+    QString speed_0x00  =   QString("%1").arg(ui->set_0x00->text().toInt(),2,16,QLatin1Char('0'));
+    QString torque_0x01 =   QString("%1").arg((int)(ui->set_0x01->text().toFloat()*100),2,16,QLatin1Char('0')) ;
+    QString Id_0x02     =   QString("%1").arg(ui->set_0x02->text().toInt(),2,16,QLatin1Char('0'));
+    QString Iq_0x03     =   QString("%1").arg(ui->set_0x03->text().toInt(),2,16,QLatin1Char('0'));
+    QString Vd_0x04     =   QString("%1").arg(ui->set_0x04->text().toInt(),2,16,QLatin1Char('0'));
+    QString Vq_0x05     =   QString("%1").arg(ui->set_0x05->text().toInt(),2,16,QLatin1Char('0'));
+    QString mode_0x06_1 =   QString("%1").arg(ui->set_0x06_1->currentIndex(),2,16,QLatin1Char('0'));
+    QString mode_0x06_2 =   QString("%1").arg(ui->set_0x06_2->currentIndex(),2,16,QLatin1Char('0'));
+
+    QString frame=speed_0x00+torque_0x01+Id_0x02+Iq_0x03+Vd_0x04+Vq_0x05+mode_0x06_1+mode_0x06_2;
+//    qDebug()<<"frame:"<<frame;
+    emit send_frame(frame);
+
+}
+
 
 //自动保存帧数据，并没用到
 /*
@@ -169,30 +199,8 @@ void Ctrpanel::savedata(){
     }
 }
 */
-//下面都是复选框选中后触发的发送信号
-void Ctrpanel::on_mcu_ox00_checkbox_clicked(bool checked)
-{
-    QString str=ui->mcu_ox00_checkbox->text();
-    int number=1;
-    emit send_option(str,checked,number); //第1个选中
-    operation(str,checked);
-}
 
-void Ctrpanel::on_mcu_ox01_checkBox_clicked(bool checked)
-{
-    QString str=ui->mcu_ox01_checkBox->text();
-    int number=2;
-    emit send_option(str,checked,number);    //第2个选中
-    operation(str,checked);
-}
-
-void Ctrpanel::on_mcu_ox02_checkbox_clicked(bool checked)
-{
-    QString str=ui->mcu_ox02_checkbox->text();
-    int number=3;
-    emit send_option(str,checked,number);
-    operation(str,checked);
-}
+//向操作日志填写内容
 void Ctrpanel::operation(QString str, bool checked){
     if(checked){
         emit send_operation_messgae(0,"选中"+str,Qt::blue);
@@ -201,10 +209,184 @@ void Ctrpanel::operation(QString str, bool checked){
     }
 }
 
-void Ctrpanel::on_sendButton_clicked()
+//下面都是复选框选中后触发的发送信号
+void Ctrpanel::on_mcu_ox00_checkbox_clicked(bool checked)
 {
-    qDebug()<<"ui->comboBox_3->currentIndex():"<<ui->comboBox_3->currentIndex();
+    QString str=ui->mcu_ox00_checkbox->text();
+    int number=0;
+    emit send_option(str,checked,number); //第1个选中
+    operation(str,checked);
 }
 
+void Ctrpanel::on_mcu_ox01_checkBox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox01_checkBox->text();
+    int number=1;
+    emit send_option(str,checked,number);    //第2个选中
+    operation(str,checked);
+}
 
+void Ctrpanel::on_mcu_ox02_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox02_checkbox->text();
+    int number=2;  emit send_option(str,checked,number);  operation(str,checked);
+}
 
+void Ctrpanel::on_mcu_ox03_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox03_checkbox->text();
+    int number=3;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox04_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox04_checkbox->text();
+    int number=4;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox05_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox05_checkbox->text();
+    int number=5;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox06_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox06_checkbox->text();
+    int number=6;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox07_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox07_checkbox->text();
+    int number=7;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox08_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox08_checkbox->text();
+    int number=8;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox09_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox09_checkbox->text();
+    int number=9;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox0A_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox0A_checkbox->text();
+    int number=10;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox0B_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox0B_checkbox->text();
+    int number=11;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox0C_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox0C_checkbox->text();
+    int number=12;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox0D_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox0D_checkbox->text();
+    int number=13;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox0E_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox0E_checkbox->text();
+    int number=14;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox0F_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox0F_checkbox->text();
+    int number=15;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox10_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox10_checkbox->text();
+    int number=16;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox11_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox11_checkbox->text();
+    int number=17;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox12_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox12_checkbox->text();
+    int number=18;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox13_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox13_checkbox->text();
+    int number=19;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox14_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox14_checkbox->text();
+    int number=20;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox15_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox15_checkbox->text();
+    int number=21;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox16_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox16_checkbox->text();
+    int number=22;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox17_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox17_checkbox->text();
+    int number=23;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox18_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox18_checkbox->text();
+    int number=24;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox19_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox19_checkbox->text();
+    int number=25;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+void Ctrpanel::on_mcu_ox1A_checkbox_clicked(bool checked)
+{
+    QString str=ui->mcu_ox1A_checkbox->text();
+    int number=26;  emit send_option(str,checked,number);  operation(str,checked);
+}
+
+//结构体预留备用
+typedef struct _Message_{
+    QString Rotate;
+    QString Torque;
+    QString Voltage;
+    QString Electricity;
+    QString Sys_Station;
+    QString Machine_Tempture;
+    QString Controller_Tempture;
+    QString Machine_Zeropoint;
+    QString Machine_Tempturypoint;
+    QString Max_AllowedTorque;
+    QString Malfunction_Output;
+}MESSAGE;

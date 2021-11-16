@@ -20,10 +20,7 @@ QString save_file="";
 //定义一个Widgets类供后面添加checkbox与lineedit用
 Widgets::Widgets(QWidget *parent):QWidget(parent)
 {
-    //每一个参数对应设定一种颜色
-    color.insert(1,QColor(0,0,255));
-    color.insert(2,QColor(0,255,0));
-    color.insert(3,QColor(255,0,0));
+
     //this->resize(232, 27);
     formLayout = new QFormLayout(this);
     formLayout->setObjectName(QStringLiteral("formLayout"));
@@ -46,8 +43,8 @@ Widgets::Widgets(QWidget *parent):QWidget(parent)
     //checkBox->setChecked(true);
     lineEdit->setMinimumWidth(50);
 
-}
 
+}
 
 class Ctrpanel;
 Showpanel::Showpanel(QWidget *parent) :
@@ -55,29 +52,9 @@ Showpanel::Showpanel(QWidget *parent) :
     ui(new Ui::Showpanel)
 {
     ui->setupUi(this);
+    this->initial();
     Showpanel::plot();
-    /*
-    QString Rotate;
-    QString Torque;
-    QString Voltage;
-    QString ;
-    QString Sys_Station;
-    QString Machine_Tempture;
-    QString Controller_Tempture;
-    QString Machine_Zeropoint;
-    QString Machine_Tempturypoint;
-    QString Max_AllowedTorque;
-    QString Malfunction_Output;
-    */
-    all_list_map.insert(1,"电机转速");
-    all_list_map.insert(2,"电机扭矩");
-    all_list_map.insert(3,"母线电压");
-    all_list_map.insert(4,"母线电流");
-    all_list_map.insert(5,"系统状态");
-    all_list_map.insert(6,"电机温度");
-    all_list_map.insert(7,"控制器温度");
-    all_list_map.insert(8,"电机零位角度");
-    //delete _ctr;
+
 }
 
 Showpanel::~Showpanel()
@@ -119,7 +96,7 @@ void Showpanel::receive_frame(QString frame){
         QList<QListWidgetItem*>item3 = ui->listWidget->findItems(iter.value(),Qt::MatchContains);
         if(!item3.isEmpty()){
             Widgets *itemWdt2 = static_cast<Widgets*>(ui->listWidget->itemWidget(item3.at(0)));
-            itemWdt2->lineEdit->setText(frame.mid(iter.key()+10,20));
+            itemWdt2->lineEdit->setText(frame.mid(iter.key()+10,4));
         }
         iter++;
     }
@@ -197,8 +174,9 @@ void Showpanel::selected(QString data,bool action,int Number){
 double Showpanel::getNow(){
     return (double)(QDateTime::currentMSecsSinceEpoch()) / 1000.0;
 }
+
 void Showpanel::change_graph(){
-//    qDebug()<<"change_graph";
+
     QMap<int, QString>::iterator iter = chosed_list_map.begin();
     showgraph_list_map.clear();                 //这里是遍历的choose_list_map并添加数据，可以改成逐个添加和清除
     ui->customwidget->clearGraphs();
@@ -305,6 +283,83 @@ void Showpanel::savedata(QString frame){
 //        qDebug()<<"没有保存"   ;
     }
 }
+
 void Showpanel::receive_start_or_not(bool start_or_not){
     receive_start=start_or_not;  //判断是否已经与下位机连接并收发数据
 }
+
+//每一个参数对应设定一种颜色
+void Showpanel::initial()
+{
+color.insert(0,QColor(0,0,0));
+color.insert(1,QColor(255,0,0));
+color.insert(2,QColor(0,255,0));
+color.insert(3,QColor(0,0,255));
+color.insert(4,QColor(139,0,0));
+color.insert(5,QColor(205,133,63));
+color.insert(6,QColor(128,128,0));
+color.insert(7,QColor(255,255,0));
+color.insert(8,QColor(0,100,0));
+color.insert(9,QColor(0,128,128));
+color.insert(10,QColor(0,191,255));
+color.insert(11,QColor(0,0,128));
+color.insert(12,QColor(153,50,204));
+color.insert(13,QColor(218,113,214));
+color.insert(14,QColor(220,20,60));
+color.insert(15,QColor(75,0,130));
+color.insert(16,QColor(70,130,180));
+color.insert(17,QColor(0,191,255));
+color.insert(18,QColor(95,158,160));
+color.insert(19,QColor(0,139,139));
+color.insert(20,QColor(144,238,144));
+color.insert(21,QColor(173,255,47));
+color.insert(22,QColor(50,205,50));
+color.insert(23,QColor(127,255,170));
+color.insert(24,QColor(175,238,238));
+color.insert(25,QColor(176,196,222));
+color.insert(26,QColor(0,0,139));
+color.insert(27,QColor(123,104,238));
+{
+    all_list_map.insert(0,"电机转速");
+    all_list_map.insert(1,"电机扭矩");
+    all_list_map.insert(2,"母线电压");
+    all_list_map.insert(3,"母线电流");
+    all_list_map.insert(4,"系统状态");
+    all_list_map.insert(5,"电机温度");
+    all_list_map.insert(6,"控制器温度");
+    all_list_map.insert(7,"电机零位角度");
+    all_list_map.insert(8,"电机瞬时角度");
+    all_list_map.insert(9,"电机最大允许扭矩");
+    all_list_map.insert(10,"故障允许输出");
+    all_list_map.insert(11,"踏板速度");
+    all_list_map.insert(12,"踏板角度");
+    all_list_map.insert(13,"左踏板瞬时扭矩");
+    all_list_map.insert(14,"右踏板瞬时扭矩");
+    all_list_map.insert(15,"踏板滤波扭矩");
+    all_list_map.insert(16,"电机故障码1");
+    all_list_map.insert(17,"电机故障码2");
+    all_list_map.insert(18,"电机故障码3");
+    all_list_map.insert(19,"电机故障码4");
+    all_list_map.insert(20,"电机故障码5");
+    all_list_map.insert(21,"电机角度磁编故障码");
+    all_list_map.insert(22,"曲柄角度磁编故障码");
+    all_list_map.insert(23,"通信小板故障码");
+    all_list_map.insert(24,"系统运行时钟");
+    all_list_map.insert(25,"软件版本号");
+    all_list_map.insert(26,"硬件版本号");
+}
+}
+
+/*
+QString Rotate;
+QString Torque;
+QString Voltage;
+QString ;
+QString Sys_Station;
+QString Machine_Tempture;
+QString Controller_Tempture;
+QString Machine_Zeropoint;
+QString Machine_Tempturypoint;
+QString Max_AllowedTorque;
+QString Malfunction_Output;
+*/

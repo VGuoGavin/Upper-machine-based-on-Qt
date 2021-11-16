@@ -62,7 +62,7 @@ private slots:
 private:
     Ui::Showpanel *ui;
     QMap<QListWidgetItem*, QCheckBox*> map;                   //item映射到CheckBox
-
+    void initial();
 
 };
 

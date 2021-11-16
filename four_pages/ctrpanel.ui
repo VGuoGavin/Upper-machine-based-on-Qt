@@ -1483,7 +1483,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEdit_28">
+          <widget class="QLineEdit" name="set_0x00">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -1564,7 +1564,7 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QLineEdit" name="lineEdit_31">
+          <widget class="QLineEdit" name="set_0x01">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -1642,7 +1642,7 @@
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QLineEdit" name="lineEdit_34">
+          <widget class="QLineEdit" name="set_0x02">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -1720,7 +1720,7 @@
           </widget>
          </item>
          <item row="6" column="1" rowspan="2">
-          <widget class="QLineEdit" name="lineEdit_37">
+          <widget class="QLineEdit" name="set_0x03">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -1798,7 +1798,7 @@
           </widget>
          </item>
          <item row="9" column="1">
-          <widget class="QLineEdit" name="lineEdit_29">
+          <widget class="QLineEdit" name="set_0x04">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -1876,7 +1876,7 @@
           </widget>
          </item>
          <item row="11" column="1" rowspan="2">
-          <widget class="QLineEdit" name="lineEdit_32">
+          <widget class="QLineEdit" name="set_0x05">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -2078,7 +2078,7 @@
           </widget>
          </item>
          <item row="16" column="1">
-          <widget class="QComboBox" name="comboBox_2">
+          <widget class="QComboBox" name="set_0x06_2">
            <item>
             <property name="text">
              <string>关波</string>
@@ -2092,7 +2092,7 @@
           </widget>
          </item>
          <item row="14" column="1">
-          <widget class="QComboBox" name="comboBox_3">
+          <widget class="QComboBox" name="set_0x06_1">
            <item>
             <property name="text">
              <string>OFF</string>

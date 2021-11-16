@@ -19,13 +19,13 @@ public:
     Ui::Home *ui;                       //修改成public在其他界面可以操纵本页的控件
 
     void ReadData();
-//    void on_SendButton_clicked();
     void OnActionTest();
-
     QSerialPort *serial;
     QString test1=0;
     QString show_receive="";
     void Find_Port();
+
+
     ~Home();
 
 signals:
@@ -40,9 +40,10 @@ private slots:
    void on_SendButton_clicked();
    void on_ClearData_clicked();
    void on_FindPort_clicked();
+   void Write_Data(QString);
 
 private:
-
+   void Unpacked_frame(QString);
 
 };
 
