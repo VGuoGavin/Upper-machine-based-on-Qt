@@ -1,4 +1,5 @@
-# Up-machine（中控上位机）
+# Upper-machine（中控上位机）
+Central control upper computer, used to control the motor, monitoring the motor running state of the data. The code mainly realizes UART data communication, as well as data unframe data transmission and other conventional upper computer functions. This is my first project, the project code annotation is more detailed.
 中控上位机，用来控制下位机，监视下位机数据。
 代码中主要实现了UART数据通信，以及数据的解帧数据传输等功能。
 这是我的第一个项目，项目中代码注释的较为详细。
